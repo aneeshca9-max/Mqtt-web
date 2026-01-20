@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>RN Energy MQTT Mobile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://unpkg.com/paho-mqtt/mqttws31.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0a2a43;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    input, button {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 16px;
+    }
+    button {
+      background: #ffb300;
+      border: none;
+      font-weight: bold;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>RN ENERGY – MQTT Mobile</h2>
+
+<input id="topic" placeholder="Topic (eg: test)" value="test">
+<input id="msg" placeholder="Message">
+
+<button onclick="sendMsg()">Send Message</button>
+
+<div id="status">Connecting...</div>
+
+<script>
+  const client = new Paho.MQTT.Client(
+    "ec91e389d1624dfa990c2bc883d331.s1.eu.hivemq.cloud",
+    8884,
+    "/mqtt",
+    "mobile_" + Math.random().toString(16).substr(2, 8)
+  );
+
+  client.onConnectionLost = function () {
+    document.getElementById("status").innerHTML = "❌ Disconnected";
+  };
+
+  client.onMessageArrived = function (message) {
+    alert("Received:\n" + message.payloadString);
+  };
+
+  client.connect({
+    userName: "aneesh_home",
+    password: "Kuttappan123",
+    useSSL: true,
+    onSuccess: function () {
+      document.getElementById("status").innerHTML = "✅ Connected";
+      client.subscribe("test");
+    },
+    onFailure: function (e) {
+      document.getElementById("status").innerHTML = "❌ Error";
+      console.log(e);
+    }
+  });
+
+  function sendMsg() {
+    const topic = document.getElementById("topic").value;
+    const msg = document.getElementById("msg").value;
+    const message = new Paho.MQTT.Message(msg);
+    message.destinationName = topic;
+    client.send(message);
+  }
+</script>
+
+</body>
+</html>
